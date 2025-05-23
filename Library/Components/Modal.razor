@@ -1,0 +1,31 @@
+﻿@if (IsOpen)
+{
+    <div class="modal-backdrop" @onclick="HandleBackdropClick">
+        <div class="modal-content" @onclick:stopPropagation>
+            <button class="close-button" @onclick="Close">×</button>
+            @ChildContent
+        </div>
+    </div>
+}
+
+@code {
+   
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task Close()
+    {
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task HandleBackdropClick()
+    {
+        await Close();
+    }
+
+    protected override void OnParametersSet()
+    {
+        StateHasChanged(); // Форсируем обновление UI
+    }
+}

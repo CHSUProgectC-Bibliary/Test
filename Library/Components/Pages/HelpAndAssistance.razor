@@ -1,0 +1,63 @@
+﻿@page "/helpandassistance"
+@rendermode InteractiveServer
+@inherits ComponentBase
+
+<PageTitle>Справка и помощь</PageTitle>
+
+<div class="help-container">
+    <h1>Справка и помощь</h1>
+
+    <section>
+        <h2>Как искать книги</h2>
+        <p>Вы можете использовать строку поиска для быстрого нахождения книг по названию. Также доступен поиск по категориям, где книги сгруппированы по тематике.</p>
+    </section>
+
+    <section>
+        <h2>Категории книг</h2>
+        <p>Категории включают: IT-технологии, Фэнтези, История, Медицина. Просто выберите нужную категорию, чтобы увидеть все книги в ней.</p>
+    </section>
+
+    <section>
+        <h2>Популярные книги</h2>
+        <p>Раздел "Популярное" отображает книги, которые чаще всего просматривали или выбирали пользователи за последний месяц.</p>
+    </section>
+
+    <section>
+        <h2>Регистрация и вход</h2>
+        <p>Регистрация позволяет сохранять избранные книги, оставлять отзывы и получать персональные рекомендации.</p>
+    </section>
+
+    <section>
+        <h2>Связь с библиотекой</h2>
+        <p>По всем вопросам вы можете связаться с нами по электронной почте: <strong>support@library.com</strong> или использовать форму обратной связи (в разработке).</p>
+    </section>
+</div>
+
+<style>
+    .help-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: #fff8f0;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .help-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .help-container section {
+            margin-bottom: 1.5rem;
+        }
+
+        .help-container h2 {
+            color: #370617;
+            margin-bottom: 0.5rem;
+        }
+
+        .help-container p {
+            line-height: 1.6;
+        }
+</style>

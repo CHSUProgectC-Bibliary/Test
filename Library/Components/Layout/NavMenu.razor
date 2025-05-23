@@ -1,0 +1,99 @@
+﻿<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Library</a>
+    </div>
+</div>
+
+
+@* <div class="nav-item px-3">
+    <button class="btn btn-outline-light me-2" @onclick="ShowLogin">Вход</button>
+    <button class="btn btn-outline-light" @onclick="ShowRegister">Регистрация</button>
+</div> *@
+
+@* <div class="nav-item px-3">
+    <NavLink class="nav-link" href="login">Вход</NavLink>
+</div>
+
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="register">Регистрация</NavLink>
+</div> *@
+
+
+<Modal @bind-IsOpen="IsLoginOpen">
+    <LoginForm OnClose="CloseLogin" />
+</Modal>
+
+<Modal @bind-IsOpen="IsRegisterOpen">
+    <RegisterForm OnClose="CloseRegister" />
+</Modal>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+
+        <style>
+            .nav-link .bi {
+                vertical-align: middle;
+                margin-right: 8px;
+                font-size: 1.2rem;
+            }
+        </style>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Главное меню
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="showall">
+                <span class="bi bi-collection-fill" aria-hidden="true"></span> Показать всё
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="searchbycategory">
+                <span class="bi bi-funnel-fill" aria-hidden="true"></span> Поиск по категориям
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="popular">
+                <span class="bi bi-star-fill" aria-hidden="true"></span> Популярное
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="helpandassistance">
+                <span class="bi bi-question-circle-fill" aria-hidden="true"></span> Справка и помощь
+            </NavLink>
+        </div>
+
+        @* <div class="mt-auto">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="login">
+                    <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Вход
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="register">
+                    <span class="bi bi-person-plus-fill" aria-hidden="true"></span> Регистрация
+                </NavLink>
+            </div>
+        </div> *@
+    </nav>
+</div>
+
+
+@code {
+    private bool IsLoginOpen = false;
+    private bool IsRegisterOpen = false;
+
+    private void ShowLogin() => IsLoginOpen = true;
+    private void ShowRegister() => IsRegisterOpen = true;
+    private void CloseLogin() => IsLoginOpen = false;
+    private void CloseRegister() => IsRegisterOpen = false;
+}

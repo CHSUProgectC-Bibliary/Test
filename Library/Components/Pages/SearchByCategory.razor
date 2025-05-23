@@ -1,0 +1,115 @@
+﻿@page "/searchbycategory"
+@attribute [StreamRendering]
+@inherits ComponentBase
+
+<h2 class="text-center">Поиск по категориям</h2>
+
+<div class="category-select">
+    <p>Выберите категорию:</p>
+    @foreach (var category in Categories)
+    {
+        <button @onclick="() => SelectCategory(category)"
+                class="category-button @(SelectedCategory == category ? "selected" : "")">
+            @category
+        </button>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(SelectedCategory))
+{
+    <div class="category-info">
+        <h4>@SelectedCategory</h4>
+        <p>@CategoryDescriptions[SelectedCategory]</p>
+    </div>
+
+    <div class="books-grid">
+        @foreach (var book in FilteredBooks)
+        {
+            <div class="book-card">
+                <h5>@book.Title</h5>
+                <p>@book.Author</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string SelectedCategory = string.Empty;
+
+    private List<string> Categories = new() { "IT-технологии", "Фэнтези", "История", "Медицина", 
+                                              "Романы", "Боевые искусства", "Пираты", "Русская классика", 
+                                              "Детективы", "Фольклор", "Приключения", "Юмор", "Кулинария", 
+                                              "Автотранспорт", "Научно-популярная литература", "Хобби", "Химия"};
+
+    private Dictionary<string, string> CategoryDescriptions = new()
+    {
+        { "IT-технологии", "Книги о программировании, сетях, технологиях и IT-бизнесе." },
+        { "Фэнтези", "Мир магии, героев, сражений и волшебства." },
+        { "История", "Факты, события и личности прошлого." },
+        { "Медицина", "Материалы для студентов, врачей и интересующихся медициной." }
+    };
+
+    private List<Book> AllBooks = new()
+    {
+        new Book("Современный C#", "Марк Дж. Прайс", "IT-технологии"),
+        new Book("Властелин колец", "Дж. Р. Р. Толкин", "Фэнтези"),
+        new Book("История России", "А. К. Климов", "История"),
+        new Book("Анатомия человека", "Грей", "Медицина")
+    };
+
+    private List<Book> FilteredBooks = new();
+
+    private void SelectCategory(string category)
+    {
+        SelectedCategory = category;
+        FilteredBooks = AllBooks.Where(b => b.Category == category).ToList();
+    }
+
+    public class Book
+    {
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public string Category { get; set; }
+
+        public Book(string title, string author, string category)
+        {
+            Title = title;
+            Author = author;
+            Category = category;
+        }
+    }
+}
+
+
+<style>
+    .category-button {
+        margin: 5px;
+        padding: 8px 16px;
+        background-color: #f0ead2;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .category-button.selected {
+            background-color: #d4a373;
+            color: white;
+        }
+
+    .books-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 20px;
+    }
+
+    .book-card {
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        width: 200px;
+    }
+
+
+</style>

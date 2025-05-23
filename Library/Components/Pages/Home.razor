@@ -1,0 +1,304 @@
+﻿@page "/"
+
+<PageTitle>Главная - Библиотека</PageTitle>
+
+<div class="library-container">
+    <!-- Заголовок и поиск -->
+    <div class="welcome-section">
+        <h1 class="text-center">Добро пожаловать на сайт библиотеки</h1>
+    </div>
+
+    <div class="new-arrivals">
+        <h2 class="text-center">Новинки библиотеки</h2>
+        <div class="new-books-grid">
+            @foreach (var newBook in NewBooks)
+            {
+                <div class="new-book-card">
+                    <img src="@newBook.CoverUrl" alt="@newBook.Title" class="book-cover" />
+                    <h5>@newBook.Title</h5>
+                    <button @onclick="() => SelectBook(newBook.Title)">Подробнее</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Блок популярной книги -->
+    <div class="featured-book">
+        <h2 class="text-center">Самая популярная книга в этом месяце</h2>
+        <p class="book-description">Рассказываем о том, какая книга пользуется популярностью среди читателей</p>
+
+        <div class="book-card">
+            <h3 class="author">Дж. К. РОУЛИНГ</h3>
+            <div class="divider"></div>
+            <h4 class="book-title">Роулинг Дж.К. - Икабог (сказка для детей)</h4>
+            <p class="book-summary">
+                Когда-то королевство Корникотия было самым богатым и счастливым в мире...
+                [полный текст описания]
+            </p>
+        </div>
+    </div>
+
+    <!-- Книга дня -->
+    <div class="book-of-the-day">
+        <h2 class="text-center">Книга дня</h2>
+        <div class="book-card">
+            <h3 class="author">Эрих Мария Ремарк</h3>
+            <div class="divider"></div>
+            <h4 class="book-title">Триумфальная арка</h4>
+            <p class="book-summary">
+                Париж. Конец 1930-х. Хирург без гражданства спасает жизни, скрываясь от прошлого...
+            </p>
+        </div>
+    </div>
+
+    <div class="voting-section">
+        <h2 class="text-center">Выберите любимую книгу месяца</h2>
+        <div class="voting-options">
+            @foreach (var book in Books)
+            {
+                <div class="voting-option">
+                    <input type="radio" name="vote" @bind="VotedBook" />
+                    <label>@book</label>
+                </div>
+            }
+        </div>
+
+        <div class="center-button">
+            <button @onclick="SubmitVote">Голосовать</button>
+        </div>
+    </div>
+
+
+
+    @* / *@
+    <div class="recommended-section">
+        <h2 class="text-center">Рекомендуем вам</h2>
+        <div class="book-card">
+            <h4>Харуки Мураками — Норвежский лес</h4>
+            <p>Трогательная история о любви, взрослении и памяти.</p>
+            <button>Подробнее</button>
+        </div>
+    </div>
+
+
+
+    <!-- Отзывы читателей -->
+    <div class="user-reviews">
+        <h2 class="text-center">Отзывы читателей</h2>
+        <div class="review">
+            <p><strong>Алина:</strong> Очень понравилась книга "Зов Ктулху", атмосфера завораживает!</p>
+        </div>
+        <div class="review">
+            <p><strong>Максим:</strong> "Нейросети для начинающих" — просто и доступно объяснено, рекомендую.</p>
+        </div>
+    </div>
+
+    <!-- Категории (если показаны) -->
+    @if (ShowCategories)
+    {
+        <div class="categories-section">
+            <h4>Поиск по категориям</h4>
+            <div class="category-buttons">
+                @foreach (var category in Categories)
+                {
+                    <button @onclick="() => SearchByCategory(category)"
+                            class="category-button">
+                        @category
+                    </button>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Список книг (если показан) -->
+    @if (ShowBooks)
+    {
+        <div class="books-list">
+            <h4>Список книг</h4>
+            <ul>
+                @foreach (var book in FilteredBooks)
+                {
+                    <li @onclick="() => SelectBook(book)" class="book-item">@book</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <!-- Модальное окно -->
+    <Modal @bind-IsOpen="IsModalOpen">
+        <div class="modal-content">
+            <h2>Справка и помощь</h2>
+            <p>Здесь представлена информация о поиске книг и категориях.</p>
+            <button @onclick="CloseModal" class="close-button">Закрыть</button>
+        </div>
+    </Modal>
+</div>
+
+@code {
+    private string SearchQuery = "";
+    private bool ShowCategories = false;
+    private bool ShowBooks = false;
+    private bool IsModalOpen = false;
+    private string? SelectedBook;
+    private string VotedBook { get; set; } //
+
+    private void SubmitVote() //
+    {
+        // Логика обработки голосования
+        Console.WriteLine($"Вы выбрали книгу: {VotedBook}");
+    }
+
+
+
+    private List<(string Title, string CoverUrl)> NewBooks = new()
+    {
+        ("Нейросети для начинающих", "/CSS/cover.jpg"),
+        ("Зов Ктулху", "/CSS/6428134409.jpg"),
+        ("История России. XX век", "/CSS/6916940791.jpg")
+    };
+
+    private List<string> Books = new() { "Стихи и пуля", "Тёмный дуб", "Тюрьма и хлеб", "Одинокий волк" };
+    private List<string> FilteredBooks = new();
+    private List<string> Categories = new() { "IT-технологии", "Фэнтези", "История", "Медицина" };
+
+    private void SearchBooks()
+    {
+        FilteredBooks = Books.FindAll(b => b.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+        ShowBooks = true;
+    }
+
+    private void ShowAllBooks()
+    {
+        FilteredBooks = new List<string>(Books);
+        ShowBooks = true;
+    }
+
+    private void ToggleCategories()
+    {
+        ShowCategories = !ShowCategories;
+    }
+
+    private void OpenModal()
+    {
+        Console.WriteLine("Открытие модального окна"); // Отладочное сообщение
+        IsModalOpen = true;
+        StateHasChanged(); // Принудительное обновление интерфейса
+    }
+
+    private void CloseModal()
+    {
+        IsModalOpen = false;
+    }
+
+    private void SelectBook(string book)
+    {
+        SelectedBook = book;
+    }
+
+    private void SearchByCategory(string category)
+    {
+        SelectedBook = $"Результаты по категории: {category}";
+        ShowBooks = false;
+    }
+}
+
+<style>
+    .center-button {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px; /* Добавьте отступ сверху, если нужно */
+    }
+
+    .voting-section button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #370617;
+        color: white;
+        border: none;
+        border-radius: 5px;
+    }
+
+    .voting-section button:hover {
+            background-color: #370617;
+    }
+
+
+    .voting-options {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px; /* Отступ между вариантами */
+    }
+
+    .voting-option {
+        background-color: #f9f9f9;
+        padding: 10px;
+        margin: 5px 0;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 300px; /* Ограничение ширины каждого элемента */
+        text-align: center; /* Центрируем текст внутри */
+    }
+
+        .voting-option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .voting-option:hover {
+            border-color: #007bff;
+            background-color: #e7f3ff;
+        }
+
+
+
+
+
+
+    .new-books-grid {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 20px 0;
+    }
+
+    .new-book-card {
+        background-color: #f5ebe0;
+        padding: 10px;
+        border-radius: 12px;
+        width: 200px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .book-cover {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .book-of-the-day, .user-reviews {
+        background-color: #fff8f0;
+        padding: 20px;
+        border-radius: 16px;
+        margin: 30px auto;
+        max-width: 800px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .review {
+        background-color: #fdf2e9;
+        padding: 10px 15px;
+        margin: 10px 0;
+        border-left: 5px solid #f4a261;
+        border-radius: 6px;
+    }
+
+
+</style>

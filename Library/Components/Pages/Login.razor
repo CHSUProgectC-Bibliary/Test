@@ -1,0 +1,43 @@
+@page "/login"
+@inject ILogger<Login> Logger
+
+<div class="container d-flex justify-content-center align-items-center" style="height: 75vh;">
+    <div class="card p-4" style="width: 300px;">
+        <h3 class="text-center">Вход</h3>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input class="form-control" @bind="Email" type="email" required maxlength="100" style="width: 250px;" />
+            <div class="invalid-feedback">Пожалуйста, введите корректный адрес электронной почты.</div>
+        </div>
+
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" class="form-control" @bind="Password" required minlength="6" maxlength="20" style="width: 250px;" />
+            <div class="invalid-feedback">Пароль должен быть от 6 до 20 символов.</div>
+        </div>
+
+        <button class="btn btn-primary w-100" @onclick="SubmitLogin" style="margin-top: 10px;">Войти</button>
+
+    </div>
+</div>
+
+@code {
+    private string Email = "";
+    private string Password = "";
+
+    private void SubmitLogin()
+    {
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            Logger.LogWarning("One or both of the login fields are empty.");
+            return;
+        }
+
+        // Note: Never log passwords or any sensitive information.
+        Logger.LogInformation("User attempted to log in with email: {Email}", Email);
+        
+        // Here you would normally handle the login logic, such as verifying credentials.
+        // For demonstration purposes, we're just logging the attempt.
+    }
+} 
