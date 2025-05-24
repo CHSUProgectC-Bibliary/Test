@@ -8,7 +8,9 @@ builder.Services.AddRazorComponents()
 
 // Добавляем свои сервисы ДО builder.Build()
 builder.Services.AddScoped<ApiService>();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("Key", x => {
+    x.BaseAddress = new Uri( builder.Configuration.GetConnectionString("API"));
+});
 
 var app = builder.Build(); // После этой строки нельзя добавлять сервисы
 

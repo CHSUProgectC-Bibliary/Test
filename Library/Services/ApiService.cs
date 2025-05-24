@@ -6,16 +6,17 @@ public class ApiService
 {
     private readonly HttpClient _httpClient;
 
-    public ApiService(HttpClient httpClient)
+    public ApiService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri("http://localhost:5002"); // или https, если используете SSL
+        _httpClient = httpClientFactory.CreateClient("Key");
+        // или https, если используете SSL вынести (можно connection string) все в конфиге Key - изменить!!
+        
     }
 
-    public async Task<List<BookDto>> GetBooksAsync()
+    public  Task<List<BookDto>> GetBooksAsync()
     {
-        return await _httpClient.GetFromJsonAsync<List<BookDto>>("/Book/All");
+        return _httpClient.GetFromJsonAsync<List<BookDto>>("/Book/All");
     }
-
+    
     // Добавьте другие методы для работы с API
 }
