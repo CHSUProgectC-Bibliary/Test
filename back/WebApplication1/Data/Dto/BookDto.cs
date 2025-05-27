@@ -5,8 +5,8 @@ public record BookDto(
     string Section,
     string Title,
     string Author,
-    string Description,
-    string Category
+    string Description
+  //  string Category
     );
 public record CreateBookDto(
     string Section,
