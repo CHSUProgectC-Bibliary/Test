@@ -1,6 +1,8 @@
 ﻿namespace BookReviewAPI.Data.Dto
 {
+
 public record BookDto(
+    string Category,
     int Book_Id,
     string Section,
     string Title,

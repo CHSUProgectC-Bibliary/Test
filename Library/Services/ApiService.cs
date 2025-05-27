@@ -12,8 +12,13 @@ public class ApiService
         // или https, если используете SSL вынести (можно connection string) все в конфиге Key - изменить!!
         
     }
+    public async Task<bool> RegisterAsync(RegisterDto dto)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/account/register", dto);
+        return response.IsSuccessStatusCode;
+    }
 
-    public  Task<List<BookDto>> GetBooksAsync()
+    public Task<List<BookDto>> GetBooksAsync()
     {
         return _httpClient.GetFromJsonAsync<List<BookDto>>("/Book/All");
     }

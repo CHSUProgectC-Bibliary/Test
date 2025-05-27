@@ -11,7 +11,10 @@ using BookReviewAPI.Data.Entities;
             CreateMap<UpdateUserDto, User>();
             CreateMap<User, UserDto>();
 
+            CreateMap<Book, BookDto>();
+            CreateMap<BookDto, Book>();
             CreateMap<CreateBookDto, Book>();
+
             CreateMap<UpdateBookDto, Book>();
             CreateMap<Book, BookDto>();
 
