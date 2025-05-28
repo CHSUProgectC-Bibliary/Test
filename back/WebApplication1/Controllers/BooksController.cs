@@ -20,6 +20,7 @@ namespace BookReviewAPI.Controllers
             var allBooks = await _bookService.GetAllBooks(cancellationToken);
             return Ok(allBooks);
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookById(int id, CancellationToken cancellationToken)
         {

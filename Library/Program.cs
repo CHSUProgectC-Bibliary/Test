@@ -6,8 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Добавляем свои сервисы ДО builder.Build()
 builder.Services.AddScoped<ApiService>();
+builder.Services.AddScoped(sp =>
+    new HttpClient
+    {
+        BaseAddress = new Uri("https://localhost:5002")
+    });
 builder.Services.AddHttpClient("Key", x => {
     x.BaseAddress = new Uri( builder.Configuration.GetConnectionString("API"));
 });

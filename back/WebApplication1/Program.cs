@@ -66,6 +66,17 @@ app.UseRouting();
 app.UseCors("AllowBlazorFrontend"); // Или "AllowAll", если нужна более открытая политика
 
 app.UseAuthorization();
+
+app.MapGet("/book/bycategory/{category}", async (string category, IBookService bookService, HttpContext context) =>
+{
+    var books = await bookService.GetBooksByCategoryAsync(category);
+    if (books == null)
+    {
+        context.Response.StatusCode = 404;
+        return Results.NotFound();
+    }
+    return Results.Json(books);
+});
 app.MapControllers();
 
 app.Run();

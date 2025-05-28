@@ -13,6 +13,7 @@ namespace BookReviewAPI.Services
         Task<BookDto> CreateBook(CreateBookDto bookDto, CancellationToken cancellationToken);
         Task UpdateBook(int id, UpdateBookDto bookDto, CancellationToken cancellationToken);
         Task DeleteBook(int id, CancellationToken cancellationToken);
+        Task<IEnumerable<BookDto>> GetBooksByCategoryAsync(string category);
     }
     public class BookService : IBookService
     {
@@ -58,6 +59,15 @@ namespace BookReviewAPI.Services
 
             _mapper.Map(BookDto, book);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<BookDto>> GetBooksByCategoryAsync(string category)
+        {
+            var books = await _context.Books
+                                           .Where(b => b.Section == category)
+                                           .ToListAsync();
+            Console.WriteLine($"Found {books.Count} books in category {category}");
+            return _mapper.Map<IEnumerable<BookDto>>(books);
         }
     }
 }

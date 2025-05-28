@@ -22,6 +22,11 @@ public class ApiService
     {
         return _httpClient.GetFromJsonAsync<List<BookDto>>("/Book/All");
     }
-    
+
+    public async Task<List<BookDto>> GetBooksByCategoryAsync(string Section)
+    {
+        return await _httpClient.GetFromJsonAsync<List<BookDto>>($"/Book/ByCategory/{Section}");
+    }
+
     // Добавьте другие методы для работы с API
 }

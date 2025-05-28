@@ -1,68 +1,54 @@
 ﻿@page "/searchbycategory"
-@attribute [StreamRendering]
-@inject ApiService ApiService
 @using BookReviewAPI.Data.Dto
+@inject ApiService ApiService
 
-<h2 class="text-center">Поиск по категориям</h2>
+<h3>Книги по категории</h3>
 
 <div class="category-select">
     <p>Выберите категорию:</p>
     @foreach (var category in Categories)
     {
-        <button @onclick="() => SelectCategory(category)"
-                class="category-button @(SelectedCategory == category ? "selected" : "")">
+        <button @onclick="() => SelectCategory(category)" class="category-button @(selectedCategory == category ? "selected" : "")">
             @category
         </button>
     }
 </div>
 
-@if (!string.IsNullOrEmpty(SelectedCategory))
+@if (filteredBooks == null)
 {
-    <div class="category-info">
-        <h4>@SelectedCategory</h4>
-        @if (CategoryDescriptions.ContainsKey(SelectedCategory))
+    <p>Loading...</p>
+}
+else
+{
+    <div class="book-list">
+        @foreach (var book in filteredBooks)
         {
-            <p>@CategoryDescriptions[SelectedCategory]</p>
-        }
-    </div>
-
-    <div class="books-grid">
-        @foreach (var book in FilteredBooks)
-        {
-            <div class="book-card">
-                <h5>@book.Title</h5>
-                <p>@book.Author</p>
+            <div class="book-item">
+                <h4>@book.Title</h4>
+                <p>Автор: @book.Author</p>
+                <p>Описание: @book.Description</p>
             </div>
         }
     </div>
 }
 
 @code {
-    private string SelectedCategory = string.Empty;
-    private List<BookDto> AllBooks = new();
-    private List<BookDto> FilteredBooks = new();
-
-    private List<string> Categories = new() { "IT-технологии", "Фэнтези", "История", "Медицина",
-                                              "Романы", "Боевые искусства", "Пираты", "Русская классика",
-                                              "Детективы", "Фольклор", "Приключения", "Юмор", "Кулинария",
-                                              "Автотранспорт", "Научно-популярная литература", "Хобби", "Химия"};
-
-    private Dictionary<string, string> CategoryDescriptions = new()
-    {
-        { "IT-технологии", "Книги о программировании, сетях, технологиях и IT-бизнесе." },
-        { "Фэнтези", "Мир магии, героев, сражений и волшебства." },
-        { "История", "Факты, события и личности прошлого." },
-        { "Медицина", "Материалы для студентов, врачей и интересующихся медициной." }
-    };
+    private List<BookDto> filteredBooks;
+    private string selectedCategory;
+    private List<string> Categories = new List<string> { "Культура", "Медицина", "Боевые искусства", "Романы", "Природа", "Автотранспорт", "Научно-популярная литература" };
 
     protected override async Task OnInitializedAsync()
     {
-        AllBooks = await ApiService.GetBooksAsync();
+        filteredBooks = await ApiService.GetBooksByCategoryAsync(Categories.FirstOrDefault());
+        Console.WriteLine($"Initial load: {filteredBooks.Count} books");
+        selectedCategory = Categories.FirstOrDefault();
     }
 
-    private void SelectCategory(string category)
+    private async Task SelectCategory(string category)
     {
-        SelectedCategory = category;
-        FilteredBooks = AllBooks.Where(b => b.Category == category).ToList();
+        selectedCategory = category;
+        filteredBooks = await ApiService.GetBooksByCategoryAsync(category);
+        Console.WriteLine($"Loaded {filteredBooks.Count} books for category {category}");
+        await InvokeAsync(StateHasChanged);
     }
 }
