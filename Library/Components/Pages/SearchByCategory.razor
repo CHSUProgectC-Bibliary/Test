@@ -1,5 +1,6 @@
 ﻿@page "/searchbycategory"
 @using BookReviewAPI.Data.Dto
+@using System.Net
 @inject ApiService ApiService
 
 <h3>Книги по категории</h3>
@@ -8,15 +9,26 @@
     <p>Выберите категорию:</p>
     @foreach (var category in Categories)
     {
-        <button @onclick="() => SelectCategory(category)" class="category-button @(selectedCategory == category ? "selected" : "")">
+        <button @onclick="() => SelectCategory(category)"
+                class="category-button @(selectedCategory == category ? "selected" : "")">
             @category
         </button>
     }
 </div>
 
-@if (filteredBooks == null)
+@if (isLoading)
 {
-    <p>Loading...</p>
+    <p><em>Загрузка...</em></p>
+}
+else if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+else if (filteredBooks != null && !filteredBooks.Any())
+{
+    <p>Книги по категории "@selectedCategory" не найдены</p>
 }
 else
 {
@@ -35,20 +47,57 @@ else
 @code {
     private List<BookDto> filteredBooks;
     private string selectedCategory;
-    private List<string> Categories = new List<string> { "Культура", "Медицина", "Боевые искусства", "Романы", "Природа", "Автотранспорт", "Научно-популярная литература" };
+    private bool isLoading;
+    private string errorMessage;
+
+    private List<string> Categories = new List<string> {
+        "IT", "Кулинария", "Медицина", "Боевые искусства", "Романы",
+        "Пираты", "Русская классика", "Юмор", "Детектив", "Автотранспорт",
+        "Научно-популярная литература", "Хобби", "Фольклор", "Химия", "Приключения"
+    };
 
     protected override async Task OnInitializedAsync()
     {
-        filteredBooks = await ApiService.GetBooksByCategoryAsync(Categories.FirstOrDefault());
-        Console.WriteLine($"Initial load: {filteredBooks.Count} books");
-        selectedCategory = Categories.FirstOrDefault();
+        // 加载默认的类别
+        await LoadBooksForCategory(Categories.First());
     }
 
     private async Task SelectCategory(string category)
     {
-        selectedCategory = category;
-        filteredBooks = await ApiService.GetBooksByCategoryAsync(category);
-        Console.WriteLine($"Loaded {filteredBooks.Count} books for category {category}");
-        await InvokeAsync(StateHasChanged);
+        // 无论当前类别是否相同，都重新加载
+        await LoadBooksForCategory(category);
+    }
+
+    private async Task LoadBooksForCategory(string category)
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            selectedCategory = category;
+
+            // 编码类别名称
+            string encodedCategory = WebUtility.UrlEncode(category);
+
+            // 调试输出
+            Console.WriteLine($"Загрузка категории: {category} (encoded: {encodedCategory})");
+
+            // 获取书籍
+            filteredBooks = await ApiService.GetBooksByCategoryAsync(encodedCategory);
+
+            // 调试输出
+            Console.WriteLine($"Получено книг: {filteredBooks?.Count ?? 0}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка: {ex.Message}";
+            Console.WriteLine($"Ошибка загрузки: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+            // 强制更新 UI
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }

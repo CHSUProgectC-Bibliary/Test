@@ -25,8 +25,24 @@ public class ApiService
 
     public async Task<List<BookDto>> GetBooksByCategoryAsync(string Section)
     {
-        return await _httpClient.GetFromJsonAsync<List<BookDto>>($"/Book/ByCategory/{Section}");
+        string encodedSection = System.Net.WebUtility.UrlEncode(Section);
+        string url = $"/Book/ByCategory/{encodedSection}";
+
+        Console.WriteLine($"Запрос к API: {url}");
+
+        var response = await _httpClient.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Ошибка запроса: {response.StatusCode}");
+            return null;
+        }
+
+        var books = await response.Content.ReadFromJsonAsync<List<BookDto>>();
+        Console.WriteLine($"Получено книг: {books?.Count ?? 0}");
+        return books;
     }
+
 
     // Добавьте другие методы для работы с API
 }
