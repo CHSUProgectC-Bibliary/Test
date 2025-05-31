@@ -13,12 +13,32 @@ namespace BookReviewAPI.Services
         Task<BookDto> CreateBook(CreateBookDto bookDto, CancellationToken cancellationToken);
         Task UpdateBook(int id, UpdateBookDto bookDto, CancellationToken cancellationToken);
         Task DeleteBook(int id, CancellationToken cancellationToken);
-        Task<IEnumerable<BookDto>> GetBooksByCategoryAsync(string category);
+        //Task<IEnumerable<BookDto>> GetBooksByCategoryAsync(string category);
+        Task<List<BookDto>> GetBooksByCategory(string section, CancellationToken cancellationToken);
     }
     public class BookService : IBookService
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        public async Task<List<BookDto>> GetBooksByCategory(string section, CancellationToken cancellationToken)
+        {
+            // Добавим логирование для отладки
+            Console.WriteLine($"Searching for books in category: {section}");
+
+            var books = await _context.Books
+                .Where(b => b.Section.ToLower() == section.ToLower()) // Сравниваем без учета регистра
+                .Select(b => new BookDto(
+                    b.Book_Id,
+                    b.Section,
+                    b.Title,
+                    b.Author,
+                    b.Description
+                ))
+                .ToListAsync(cancellationToken);
+
+            Console.WriteLine($"Found {books.Count} books in category {section}");
+            return books;
+        }
         public BookService(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
@@ -61,13 +81,13 @@ namespace BookReviewAPI.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<BookDto>> GetBooksByCategoryAsync(string category)
-        {
-            var books = await _context.Books
-                                           .Where(b => b.Section == category)
-                                           .ToListAsync();
-            Console.WriteLine($"Found {books.Count} books in category {category}");
-            return _mapper.Map<IEnumerable<BookDto>>(books);
-        }
+        //public async Task<IEnumerable<BookDto>> GetBooksByCategoryAsync(string category)
+        //{
+        //    var books = await _context.Books
+        //                                   .Where(b => b.Section == category)
+        //                                   .ToListAsync();
+        //    Console.WriteLine($"Found {books.Count} books in category {category}");
+        //    return _mapper.Map<IEnumerable<BookDto>>(books);
+        //}
     }
 }

@@ -1,46 +1,64 @@
 ﻿using System.Net.Http.Json;
-using BookReviewAPI.Data.Dto;
 
 
 public class ApiService
 {
     private readonly HttpClient _httpClient;
 
-    public ApiService(IHttpClientFactory httpClientFactory)
+    public ApiService(HttpClient httpClient)
     {
-        _httpClient = httpClientFactory.CreateClient("Key");
-        // или https, если используете SSL вынести (можно connection string) все в конфиге Key - изменить!!
-        
+        _httpClient = httpClient;
     }
     public async Task<bool> RegisterAsync(RegisterDto dto)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/account/register", dto);
+        var userDto = new CreateUserDto(
+            User_name: dto.Email, // или добавить поле UserName в форму
+            Email: dto.Email,
+            Password: dto.Password
+        );
+
+        var response = await _httpClient.PostAsJsonAsync("User", userDto); // <-- маршрут "User"
+        return response.IsSuccessStatusCode;
+    }
+    public async Task<bool> LoginAsync(LoginDto dto)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/account/login", dto);
         return response.IsSuccessStatusCode;
     }
 
+
     public Task<List<BookDto>> GetBooksAsync()
     {
-        return _httpClient.GetFromJsonAsync<List<BookDto>>("/Book/All");
+        return _httpClient.GetFromJsonAsync<List<BookDto>>("Book/All");
     }
 
-    public async Task<List<BookDto>> GetBooksByCategoryAsync(string Section)
+    public async Task<List<BookDto>> GetBooksByCategoryAsync(string section)
     {
-        string encodedSection = System.Net.WebUtility.UrlEncode(Section);
-        string url = $"/Book/ByCategory/{encodedSection}";
-
-        Console.WriteLine($"Запрос к API: {url}");
-
-        var response = await _httpClient.GetAsync(url);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            Console.WriteLine($"Ошибка запроса: {response.StatusCode}");
-            return null;
+            string encodedSection = System.Net.WebUtility.UrlEncode(section);
+            string url = $"Book/ByCategory/{encodedSection}";
+
+            Console.WriteLine($"Requesting books for category: {section} (encoded: {encodedSection})");
+
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Error: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
+                return new List<BookDto>();
+            }
+
+            var books = await response.Content.ReadFromJsonAsync<List<BookDto>>();
+            Console.WriteLine($"Received {books?.Count ?? 0} books for category {section}");
+            return books ?? new List<BookDto>();
         }
 
-        var books = await response.Content.ReadFromJsonAsync<List<BookDto>>();
-        Console.WriteLine($"Получено книг: {books?.Count ?? 0}");
-        return books;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception while getting books: {ex}");
+            return new List<BookDto>();
+        }
     }
 
 

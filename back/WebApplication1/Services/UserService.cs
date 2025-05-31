@@ -13,6 +13,7 @@ namespace BookReviewAPI.Services
         Task<UserDto> CreateUser(CreateUserDto UserDto, CancellationToken cancellationToken);
         Task UpdateUser(int id, UpdateUserDto UserDto, CancellationToken cancellationToken);
         Task DeleteUser(int id, CancellationToken cancellationToken);
+        Task<UserDto?> GetUserByEmail(string email, CancellationToken cancellationToken);
     }
     public class UserService : IUserService
     {
@@ -59,5 +60,14 @@ namespace BookReviewAPI.Services
             _mapper.Map(UserDto, user);
             await _context.SaveChangesAsync();
         }
+        public async Task<UserDto?> GetUserByEmail(string email, CancellationToken cancellationToken)
+        {
+            var user = await _context.Users
+                .Where(u => u.Email == email)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return user is null ? null : new UserDto(user.User_Id, user.User_name, user.Email, user.Password);
+        }
+
     }
 }

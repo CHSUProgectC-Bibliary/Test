@@ -1,6 +1,4 @@
-﻿namespace BookReviewAPI.Data.Dto
-{
-    public record ReviewDto(
+﻿    public record ReviewDto(
         int Review_Id,
         int User_Id,
         int Book_id,
@@ -25,4 +23,4 @@
         int Rating,
         string Comment
         );
-}
+

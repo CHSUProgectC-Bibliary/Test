@@ -1,5 +1,6 @@
 ﻿using BookReviewAPI.Data.Dto;
 using BookReviewAPI.Services;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using SendGrid.Helpers.Errors.Model;
 namespace BookReviewAPI.Controllers
@@ -28,6 +29,25 @@ namespace BookReviewAPI.Controllers
             if (book == null) return NotFound();
             return Ok(book);
         }
+        [HttpGet("ByCategory/{section}")]
+        public async Task<IActionResult> GetBooksByCategory(string section, CancellationToken cancellationToken)
+        {
+            // Используем UrlDecode, чтобы + → пробел
+            var decodedSection = HttpUtility.UrlDecode(section);
+
+            Console.WriteLine($"[API] Категория после декодинга: '{decodedSection}'");
+
+            var books = await _bookService.GetBooksByCategory(decodedSection, cancellationToken);
+
+            if (books == null || !books.Any())
+            {
+                return NotFound($"Книги в категории '{decodedSection}' не найдены");
+            }
+
+            return Ok(books);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> AddBook(CreateBookDto bookDto, CancellationToken cancellationToken)
         {

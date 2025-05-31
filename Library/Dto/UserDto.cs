@@ -1,6 +1,4 @@
-﻿namespace BookReviewAPI.Data.Dto
-{
-    public record UserDto(
+﻿    public record UserDto(
         int User_Id,
         string User_name,
         string Email,
@@ -16,4 +14,3 @@
         string Email,
         string Password
         );
-}

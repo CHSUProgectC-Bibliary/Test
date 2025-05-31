@@ -1,52 +1,72 @@
 ﻿@page "/searchbycategory"
-@using BookReviewAPI.Data.Dto
 @using System.Net
 @inject ApiService ApiService
+@rendermode InteractiveServer
+@using System.Globalization
 
 <h3>Книги по категории</h3>
 
 <div class="category-select">
     <p>Выберите категорию:</p>
-    @foreach (var category in Categories)
-    {
-        <button @onclick="() => SelectCategory(category)"
-                class="category-button @(selectedCategory == category ? "selected" : "")">
-            @category
-        </button>
-    }
+    <div class="category-buttons">
+        @foreach (var category in Categories)
+        {
+            <button @onclick="() => SelectCategory(category)"
+                    class="btn @(selectedCategory == category ? "btn-primary" : "btn-outline-primary")">
+                @category
+            </button>
+        }
+    </div>
 </div>
 
 @if (isLoading)
 {
-    <p><em>Загрузка...</em></p>
+    <div class="text-center mt-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <p>Ищем книги по категории "@selectedCategory"...</p>
+    </div>
 }
 else if (errorMessage != null)
 {
-    <div class="alert alert-danger">
+    <div class="alert alert-danger mt-3">
         @errorMessage
     </div>
 }
 else if (filteredBooks != null && !filteredBooks.Any())
 {
-    <p>Книги по категории "@selectedCategory" не найдены</p>
+    <div class="alert alert-info mt-3">
+        Книги по категории "@selectedCategory" не найдены. Попробуйте другую категорию!
+    </div>
 }
-else
+else if (filteredBooks != null)
 {
-    <div class="book-list">
-        @foreach (var book in filteredBooks)
-        {
-            <div class="book-item">
-                <h4>@book.Title</h4>
-                <p>Автор: @book.Author</p>
-                <p>Описание: @book.Description</p>
-            </div>
-        }
+    <div class="book-list mt-3">
+        <h4>Найдено @filteredBooks.Count книг в категории "@selectedCategory":</h4>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var book in filteredBooks)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@book.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
+                            <p class="card-text">@book.Description</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Категория: @book.Section</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 }
 
 @code {
-    private List<BookDto> filteredBooks;
-    private string selectedCategory;
+    private List<BookDto> filteredBooks = new();
+    private string selectedCategory = string.Empty;
     private bool isLoading;
     private string errorMessage;
 
@@ -58,45 +78,46 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // 加载默认的类别
-        await LoadBooksForCategory(Categories.First());
+        Console.WriteLine("Component initialized");
+        if (Categories.Any())
+        {
+            await LoadBooksForCategory(Categories.First());
+        }
     }
 
     private async Task SelectCategory(string category)
     {
-        // 无论当前类别是否相同，都重新加载
-        await LoadBooksForCategory(category);
+        Console.WriteLine($"НАЖАЛИ КНОПКУ: {category}");
+
+        if (selectedCategory != category)
+        {
+            selectedCategory = category;
+            await LoadBooksForCategory(category);
+        }
     }
+
 
     private async Task LoadBooksForCategory(string category)
     {
+        Console.WriteLine($"Загружаем книги по категории: {category}");
+
         try
         {
             isLoading = true;
             errorMessage = null;
-            selectedCategory = category;
+            await InvokeAsync(StateHasChanged);
 
-            // 编码类别名称
-            string encodedCategory = WebUtility.UrlEncode(category);
-
-            // 调试输出
-            Console.WriteLine($"Загрузка категории: {category} (encoded: {encodedCategory})");
-
-            // 获取书籍
-            filteredBooks = await ApiService.GetBooksByCategoryAsync(encodedCategory);
-
-            // 调试输出
-            Console.WriteLine($"Получено книг: {filteredBooks?.Count ?? 0}");
+            var books = await ApiService.GetBooksByCategoryAsync(category);
+            filteredBooks = books ?? new List<BookDto>();
         }
         catch (Exception ex)
         {
-            errorMessage = $"Ошибка: {ex.Message}";
-            Console.WriteLine($"Ошибка загрузки: {ex}");
+            errorMessage = $"Error: {ex.Message}";
+            filteredBooks = new List<BookDto>();
         }
         finally
         {
             isLoading = false;
-            // 强制更新 UI
             await InvokeAsync(StateHasChanged);
         }
     }

@@ -1,10 +1,14 @@
-﻿@inherits LayoutComponentBase
+﻿@using Library.Services
+@using System.ComponentModel
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject UserSession UserSession
+@implements IDisposable
 
 <div class="page" style="background-image: url('/CSS/fon.jpg');">
     <div class="sidebar">
         <NavMenu />
     </div>
-
     <main>
         <div class="top-row px-4 d-flex justify-content-between align-items-center" style="background-color: #f5ebe0;">
             <div class="search-bar d-flex align-items-center">
@@ -14,21 +18,12 @@
                 <button style="margin-left: 0.5rem; padding: 0.4rem 0.8rem; border: none; background-color: #370617; color: white; border-radius: 4px;">
                     Найти
                 </button>
-            </div>
 
-            <div class="d-flex align-items-center">
-                <a href="/login"
-                   style="padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.9rem;
-                          margin-right: 10px; border: 1px solid #370617;
-                          background-color: white; color: #370617;">
-                    Вход
-                </a>
-                <a href="/register"
-                   style="padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.9rem;
-                          background-color: #370617; color: white; border: 1px solid #370617;">
-                    Регистрация
-                </a>
             </div>
+            
+            <div class="d-flex align-items-center">
+<Component />            </div>
+
         </div>
 
         <article class="content px-4">
@@ -42,3 +37,25 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+@code {
+    protected override void OnInitialized()
+    {
+
+        UserSession.PropertyChanged += OnSessionChanged;
+    
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await UserSession.InitializeAsync();
+    }
+    private void OnSessionChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.PropertyChanged -= OnSessionChanged;
+    }
+
+}

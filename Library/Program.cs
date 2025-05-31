@@ -1,20 +1,32 @@
 using Library.Components;
+using Library.Services;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddScoped<UserSession>();
+builder.Services.AddScoped<ProtectedLocalStorage>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-builder.Services.AddScoped<ApiService>();
-builder.Services.AddScoped(sp =>
-    new HttpClient
+builder.Services.AddServerSideBlazor()
+    .AddHubOptions(options =>
     {
-        BaseAddress = new Uri("https://localhost:5002")
+        options.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
+        options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
     });
-builder.Services.AddHttpClient("Key", x => {
-    x.BaseAddress = new Uri( builder.Configuration.GetConnectionString("API"));
+
+builder.Services.AddHttpClient<ApiService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("API")!);
 });
+builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
+
+
+
+
+// И в конвейере:
 
 var app = builder.Build(); // После этой строки нельзя добавлять сервисы
 

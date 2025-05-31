@@ -1,12 +1,12 @@
-﻿namespace BookReviewAPI.Data.Dto
-{
-
-public record BookDto(
+﻿public record BookDto(
     int Book_Id,
     string Section,
     string Title,
     string Author,
     string Description
+
+
+  //  string Category
     );
 public record CreateBookDto(
     string Section,
@@ -20,4 +20,3 @@ public record UpdateBookDto(
     string Author,
     string Description
     );
-}
