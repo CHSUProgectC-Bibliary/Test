@@ -9,22 +9,30 @@ public class ApiService
     {
         _httpClient = httpClient;
     }
+    public async Task<UserDto?> LoginAsync(LoginDto dto)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/account/login", dto);
+        if (response.IsSuccessStatusCode)
+        {
+            var user = await response.Content.ReadFromJsonAsync<UserDto>();
+            return user;
+        }
+
+        return null;
+    }
+
     public async Task<bool> RegisterAsync(RegisterDto dto)
     {
         var userDto = new CreateUserDto(
-            User_name: dto.Email, // или добавить поле UserName в форму
+            User_name: dto.UserName,
             Email: dto.Email,
             Password: dto.Password
         );
 
-        var response = await _httpClient.PostAsJsonAsync("User", userDto); // <-- маршрут "User"
+        var response = await _httpClient.PostAsJsonAsync("User", userDto);
         return response.IsSuccessStatusCode;
     }
-    public async Task<bool> LoginAsync(LoginDto dto)
-    {
-        var response = await _httpClient.PostAsJsonAsync("api/account/login", dto);
-        return response.IsSuccessStatusCode;
-    }
+
 
 
     public Task<List<BookDto>> GetBooksAsync()

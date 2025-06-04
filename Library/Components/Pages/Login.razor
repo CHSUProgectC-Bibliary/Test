@@ -8,56 +8,52 @@
 @inject ApiService ApiService
 @inject NavigationManager Navigation
 @inject ProtectedLocalStorage LocalStorage
-<div class="container d-flex justify-content-center align-items-center" style="height: 75vh;">
-    <div class="card p-4" style="width: 300px;">
-        <h3 class="text-center">Вход</h3>
 
-        <form @onsubmit="HandleLogin">
-            <div class="form-group">
-                <label>Email</label>
-                <input class="form-control" @bind="Email" type="email" required maxlength="100" style="width: 250px;" autocomplete="username" />
-            </div>
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
 
-            <div class="form-group">
-                <label>Пароль</label>
-                <input type="password" class="form-control" @bind="Password" required minlength="6" maxlength="20" style="width: 250px;" autocomplete="current-password" />
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100" style="margin-top: 10px;">Войти</button>
-        </form>
+<form @onsubmit="HandleLogin">
+    <div class="form-group">
+        <label>Email</label>
+        <input class="form-control" @bind="Email" type="email" required maxlength="100" />
     </div>
-</div>
+
+    <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" class="form-control" @bind="Password" required minlength="6" maxlength="20" />
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 mt-2">Войти</button>
+</form>
 
 @code {
     private string Email = "";
     private string Password = "";
+    private string ErrorMessage = "";
+
+    [Parameter] public EventCallback OnLoginSuccess { get; set; }
 
     private async Task HandleLogin()
     {
-        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
-        {
-            Console.WriteLine("Введите email и пароль.");
-            return;
-        }
-
-        var result = await ApiService.LoginAsync(new LoginDto
+        ErrorMessage = ""; // Сброс предыдущей ошибки
+        var user = await ApiService.LoginAsync(new LoginDto
         {
             Email = Email,
             Password = Password
         });
 
-        if (result)
+        if (user != null)
         {
-            Console.WriteLine("Вход выполнен.");
-            await UserSession.LoginAsync(Email);
-            Navigation.NavigateTo("/", forceLoad: true);
-
+            await UserSession.LoginAsync(user);
+            await OnLoginSuccess.InvokeAsync(); // Сначала уведомляем родителя
+            await Task.Delay(100); // Даем время на обновление UI
+            Navigation.NavigateTo("/", forceLoad: true); // Затем перенаправляем
         }
         else
         {
-            Console.WriteLine("Ошибка входа. Проверьте email и пароль.");
+            ErrorMessage = "Неверный email или пароль.";
         }
     }
-
 }
-

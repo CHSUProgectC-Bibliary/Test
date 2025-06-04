@@ -3,7 +3,7 @@ using Library.Services;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddScoped<UserSession>();
+
 builder.Services.AddScoped<ProtectedLocalStorage>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -11,10 +11,11 @@ builder.Services.AddRazorComponents()
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options =>
     {
-        options.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
-        options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+        options.ClientTimeoutInterval = TimeSpan.FromMinutes(5); // Увеличьте таймаут
+        options.KeepAliveInterval = TimeSpan.FromSeconds(10);
         options.HandshakeTimeout = TimeSpan.FromSeconds(30);
     });
+builder.Services.AddScoped<UserSession>();
 
 builder.Services.AddHttpClient<ApiService>(client =>
 {

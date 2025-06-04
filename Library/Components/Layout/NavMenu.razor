@@ -3,7 +3,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject UserSession UserSession
-@implements IDisposable
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -15,7 +15,7 @@
 
 
 <Modal @bind-IsOpen="IsLoginOpen">
-    <LoginForm OnClose="CloseLogin" />
+    <LoginForm OnClose="CloseLogin" OnLoginSuccess="OnLoginSuccess" />
 </Modal>
 
 <Modal @bind-IsOpen="IsRegisterOpen">
@@ -65,21 +65,23 @@
                 <span class="bi bi-question-circle-fill" aria-hidden="true"></span> Справка и помощь
             </NavLink>
         </div>
+
         <div class="mt-auto">
             @if (UserSession.IsLoggedIn)
             {
                 <div class="nav-item px-3">
                     <span class="nav-link disabled">
                         <span class="bi bi-person-circle" aria-hidden="true"></span>
-                        @UserSession.Email
+                        @UserSession.UserName
                     </span>
                 </div>
                 <div class="nav-item px-3">
-    <a class="nav-link" href="" @onclick="Logout">
-        <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Выйти
-    </a>
-</div>
+                    <a class="nav-link" href="" @onclick="Logout">
+                        <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Выйти
+                    </a>
+                </div>
             }
+
             else
             {
                 <div class="nav-item px-3">
@@ -98,8 +100,12 @@
     </nav>
 </div>
 
-
+@implements IDisposable
 @code {
+    public void Dispose()
+    {
+        UserSession.PropertyChanged -= OnSessionChanged;
+    }
     private bool IsLoginOpen = false;
     private bool IsRegisterOpen = false;
 
@@ -108,23 +114,38 @@
     private void CloseLogin() => IsLoginOpen = false;
     private void CloseRegister() => IsRegisterOpen = false;
 
+    private void OnLoginSuccess()
+    {
+        IsLoginOpen = false;
+        StateHasChanged(); // <<< ВАЖНО
+        Navigation.NavigateTo("/", true);
+    }
+
     protected override void OnInitialized()
     {
         UserSession.PropertyChanged += OnSessionChanged;
     }
 
-    private void OnSessionChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        UserSession.PropertyChanged -= OnSessionChanged;
-    }
+    // private void OnSessionChanged(object? sender, PropertyChangedEventArgs e)
+    // {
+    //     InvokeAsync(StateHasChanged);
+    // }
 
     private async Task Logout()
     {
         await UserSession.LogoutAsync();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UserSession.InitializeAsync();
+        }
+    }
+
+    private async void OnSessionChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        await InvokeAsync(StateHasChanged);
+        Console.WriteLine($"Session changed: {e.PropertyName}, IsLoggedIn: {UserSession.IsLoggedIn}");
     }
 }

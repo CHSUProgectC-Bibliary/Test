@@ -1,6 +1,15 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+﻿@using Library.Services
+<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+@code {
+    [Inject] private UserSession UserSession { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UserSession.InitializeAsync();
+    }
+}
